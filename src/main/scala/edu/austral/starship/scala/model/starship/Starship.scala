@@ -1,5 +1,6 @@
 package edu.austral.starship.scala.model.starship
 
+import edu.austral.starship.scala.base.collision.CollisionableType
 import edu.austral.starship.scala.base.vector.Vector2
 import edu.austral.starship.scala.model.weapon.Weapon
 import edu.austral.starship.scala.model.CollisionableObject
@@ -7,6 +8,7 @@ import edu.austral.starship.scala.model.player.Player
 
 abstract class Starship extends CollisionableObject{
 
+  override val collisionableType: CollisionableType.Value = CollisionableType.Starship
   var positionVector: Vector2
   var directionVector: Vector2
   var weapon: Weapon

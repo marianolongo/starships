@@ -7,7 +7,7 @@ import edu.austral.starship.scala.model.CollisionableObject
 import edu.austral.starship.scala.model.asteroid.{Asteroid, AsteroidImpl}
 import edu.austral.starship.scala.model.bullet.Bullet
 import edu.austral.starship.scala.model.player.Player
-import edu.austral.starship.scala.model.starship.MyStarship
+import edu.austral.starship.scala.model.starship.{MyStarship, Starship}
 import edu.austral.starship.scala.view.{AsteroidView, BulletView, StarshipView}
 import edu.austral.starship.scala.view.screen.Screen
 import processing.core.{PGraphics, PImage}
@@ -27,10 +27,7 @@ object CustomGameFramework extends GameFramework {
   var starshipView = StarshipView(starship, starshipImage)
   var bulletViews: List[BulletView] = List()
 
-  var starship2 = MyStarship(player2, 666, 500)
-  var starship2Image: PImage = new PImage()
   var asteroids: List[Asteroid] = List()
-  var starship2View = StarshipView(starship2, starship2Image)
   var asteroidImage: PImage = new PImage()
   var asteroidViews: List[AsteroidView] = List()
   var bulletImage: PImage = new PImage()
@@ -45,7 +42,6 @@ object CustomGameFramework extends GameFramework {
     asteroidImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\asteroid.jpg")
     starshipView.setImg(starshipImage)
 
-    starship2Image = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship3.png")
     collisionEngine = new CollisionEngine[CollisionableObject]
   }
 
@@ -112,7 +108,6 @@ object CustomGameFramework extends GameFramework {
     drawAsteroids(graphics)
     checkCollisions()
     keyHandler(keySet)
-    //    println(player.points)
     //    inertiaStarship(0.005 toFloat)
   }
 
@@ -127,11 +122,6 @@ object CustomGameFramework extends GameFramework {
         bullets = starship.weapon.bullets
         bulletViews = BulletView(starship.weapon.bullets.head, bulletImage) :: bulletViews
       }
-      case 38 => starship2.accelerate(Vector2(0, -0.25 toFloat))
-      case 37 => starship2.accelerate(Vector2(-0.25 toFloat, 0))
-      case 40 => starship2.accelerate(Vector2(0, 0.25 toFloat))
-      case 39 => starship2.accelerate(Vector2(0.25 toFloat, 0))
-      case _ =>
     }
   }
   override def keyPressed(event: KeyEvent): Unit = {
@@ -142,7 +132,7 @@ object CustomGameFramework extends GameFramework {
 
 
   def drawStarship(graphics: PGraphics): Unit = {
-    
+
     var directionX = starshipView.directionVector.x
     var directionY = starshipView.directionVector.y
     var positionX = starshipView.positionVector.x + directionX

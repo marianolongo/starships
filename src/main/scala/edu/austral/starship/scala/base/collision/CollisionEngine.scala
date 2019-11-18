@@ -3,7 +3,13 @@ package edu.austral.starship.scala.base.collision
 import java.awt.Shape
 import java.awt.geom.Area
 
+object CollisionableType extends Enumeration {
+
+  val Asteroid, Bullet, Starship = Value
+}
+
 trait Collisionable[T <: Collisionable[T]] {
+
   def getShape: Shape
 
   def collisionedWith(collisionable: T)

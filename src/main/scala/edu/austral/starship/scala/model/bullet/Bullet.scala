@@ -2,12 +2,14 @@ package edu.austral.starship.scala.model.bullet
 
 import java.awt.{Rectangle, Shape}
 
+import edu.austral.starship.scala.base.collision.CollisionableType
 import edu.austral.starship.scala.base.vector.Vector2
 import edu.austral.starship.scala.model.CollisionableObject
 import edu.austral.starship.scala.model.weapon.Weapon
 
 case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int, maxY: Int) extends CollisionableObject{
 
+  override val collisionableType: CollisionableType.Value = CollisionableType.Bullet
   var positionVector: Vector2 = position
   var directionVector: Vector2 = direction
   var destroyed: Boolean = false
@@ -18,7 +20,10 @@ case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int,
   override def getShape: Shape = shape
 
   override def collisionedWith(collisionable: CollisionableObject): Unit = {
-    destroy()
+    if(collisionable.collisionableType == CollisionableType.Asteroid) {
+      destroy()
+      weapon.starship.player.addPoints(1)
+    }
   }
 
   override def accelerate(vector: Vector2): Unit = {
@@ -41,7 +46,6 @@ case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int,
 
   def destroy(): Unit = {
     destroyed = true
-    weapon.starship.player.addPoints(1)
   }
 
   def calculateNewPosition(): Unit = {
