@@ -21,41 +21,57 @@ object CustomGameFramework extends GameFramework {
   var player = Player(0)
   var player2 = Player(0)
 
-  var starship = MyStarship(player, 333, 500)
-  var bullets: List[Bullet] = starship.weapon.bullets
-  var starshipImage: PImage = new PImage()
-  var starshipView = StarshipView(starship, starshipImage)
-  var bulletViews: List[BulletView] = List()
+//  var starship = MyStarship(player, 333, 500)
+//  var bullets: List[Bullet] = starship.weapon.bullets
+//  var starshipImage: PImage = new PImage()
+//  var starshipView = StarshipView(starship, starshipImage)
+//  var bulletViews: List[BulletView] = List()
 
   var asteroids: List[Asteroid] = List()
   var asteroidImage: PImage = new PImage()
   var asteroidViews: List[AsteroidView] = List()
   var bulletImage: PImage = new PImage()
 
+  var starships: List[Starship] = List()
+  var starshipsImages: List[PImage] = List()
+  var starshipsViews: List[StarshipView] = List()
+
+  var bullets: List[List[Bullet]] = List()
+
+  var bulletViews: List[BulletView] = List()
   var collisionEngine: CollisionEngine[CollisionableObject] = _
 
   override def setup(windowsSettings: WindowSettings, imageLoader: ImageLoader): Unit = {
     windowsSettings
       .setSize(screen.x, screen.y)
-    starshipImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship2.png")
+//    starshipImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship2.png")
     bulletImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\bullet.jpg")
     asteroidImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\asteroid.jpg")
-    starshipView.setImg(starshipImage)
+//    starshipView.setImg(starshipImage)
 
     collisionEngine = new CollisionEngine[CollisionableObject]
+
+    starships = List(MyStarship(player, 333, 500), MyStarship(player2, 666, 500))
+    starshipsImages = List(imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship2.png"), imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship3.png"))
+    starshipsViews = List(StarshipView(starships.head, starshipsImages.head), StarshipView(starships(1), starshipsImages(1)))
+
+    bullets = List(starships.head.weapon.bullets, starships(1).weapon.bullets)
   }
 
   def checkCollisions(): Unit = {
-    val collisionables: List[CollisionableObject] = starship :: asteroids ++ bullets
+    val collisionables: List[CollisionableObject] = starships ++ asteroids ++ bullets.head ++ bullets(1)
     collisionEngine.checkCollisions(collisionables)
   }
 
   def drawBullets(graphics: PGraphics): Unit = {
-    bullets.foreach(bullet => {
-      bullet.calculateNewPosition()
-      bullet.checkDestroy()
+    bullets.foreach(starshipBullets => {
+      starshipBullets.foreach(bullet => {
+        bullet.calculateNewPosition()
+        bullet.checkDestroy()
+      })
     })
-    bullets = bullets.filter(!_.destroyed)
+//    bullets = bullets.filter(!_.destroyed)
+    bullets = bullets.map(_.filter(!_.destroyed))
 
     bulletViews.foreach(bull => {
       bull.calculateNewPosition()
@@ -113,15 +129,24 @@ object CustomGameFramework extends GameFramework {
 
   def keyHandler(keySet: Set[Int]): Unit ={
     keySet.foreach {
-      case 87 => starship.accelerate(Vector2(0, -0.25 toFloat))
-      case 65 => starship.accelerate(Vector2(-0.25 toFloat, 0))
-      case 83 => starship.accelerate(Vector2(0, 0.25 toFloat))
-      case 68 => starship.accelerate(Vector2(0.25 toFloat, 0))
-      case 77 => {
-        starship.fire()
-        bullets = starship.weapon.bullets
-        bulletViews = BulletView(starship.weapon.bullets.head, bulletImage) :: bulletViews
-      }
+      case 87 => starships.head.accelerate(Vector2(0, -0.25 toFloat))
+      case 65 => starships.head.accelerate(Vector2(-0.25 toFloat, 0))
+      case 83 => starships.head.accelerate(Vector2(0, 0.25 toFloat))
+      case 68 => starships.head.accelerate(Vector2(0.25 toFloat, 0))
+      case 77 =>
+        starships.head.fire()
+        bullets = List(starships.head.weapon.bullets, bullets(1))
+        bulletViews = BulletView(starships.head.weapon.bullets.head, bulletImage) :: bulletViews
+
+      case 38 => starships(1).accelerate(Vector2(0, -0.25 toFloat))
+      case 37 => starships(1).accelerate(Vector2(-0.25 toFloat, 0))
+      case 40 => starships(1).accelerate(Vector2(0, 0.25 toFloat))
+      case 39 => starships(1).accelerate(Vector2(0.25 toFloat, 0))
+      case 96 =>
+        starships(1).fire()
+        bullets = List(bullets.head, starships(1).weapon.bullets)
+        bulletViews = BulletView(starships(1).weapon.bullets.head, bulletImage) :: bulletViews
+      case _ =>
     }
   }
   override def keyPressed(event: KeyEvent): Unit = {
@@ -133,48 +158,52 @@ object CustomGameFramework extends GameFramework {
 
   def drawStarship(graphics: PGraphics): Unit = {
 
-    var directionX = starshipView.directionVector.x
-    var directionY = starshipView.directionVector.y
-    var positionX = starshipView.positionVector.x + directionX
-    var positionY = starshipView.positionVector.y + directionY
+    var i = 0
+    starshipsViews.foreach(starshipView => {
+      var directionX = starshipView.directionVector.x
+      var directionY = starshipView.directionVector.y
+      var positionX = starshipView.positionVector.x + directionX
+      var positionY = starshipView.positionVector.y + directionY
 
-    if (positionX > screen.x - 40) {
-      positionX = screen.x - 40
-      starship.break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
-    }
-    if (positionX < 10) {
-      positionX = 10
-      starship.break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
-    }
-    if (positionY > screen.y - 40) {
-      positionY = screen.y - 40
-      starship.break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
-    }
-    if (positionY < 10) {
-      positionY = 10
-      starship.break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
-    }
+      if (positionX > screen.x - 40) {
+        positionX = screen.x - 40
+        starships(i).break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
+      }
+      if (positionX < 10) {
+        positionX = 10
+        starships(i).break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
+      }
+      if (positionY > screen.y - 40) {
+        positionY = screen.y - 40
+        starships(i).break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
+      }
+      if (positionY < 10) {
+        positionY = 10
+        starships(i).break(Vector2(directionX * 0.1 toFloat, directionY * 0.1 toFloat))
+      }
 
-    graphics.image(starshipView.image,
-      positionX,
-      positionY,
-      40,
-      40)
-    starship.setPositionVector(Vector2(positionX, positionY))
-    starship.calculateNewPosition()
-    starshipView.setDirectionVector(starship.directionVector)
-    starshipView.setPositionVector(starship.positionVector)
-    //    println("Starship Position X: " + starship.positionVector.x)
-    //    println("StarshipView Position X: " + starshipView.positionVector.x)
-    //    println("Starship Position Y: " + starship.positionVector.y)
-    //    println("StarshipView Position Y: " + starshipView.positionVector.y)
-    //    println("Starship Direction X: " + starship.directionVector.x)
-    //    println("StarshipView Direction X: " + starshipView.directionVector.x)
-    //    println("Starship Direction Y: " + starship.directionVector.y)
-    //    println("StarshipView Direction Y: " + starshipView.directionVector.y)
+      graphics.image(starshipView.image,
+        positionX,
+        positionY,
+        40,
+        40)
+      starships(i).setPositionVector(Vector2(positionX, positionY))
+      starships(i).calculateNewPosition()
+      starshipView.setDirectionVector(starships(i).directionVector)
+      starshipView.setPositionVector(starships(i).positionVector)
+      i = i + 1
+      //    println("Starship Position X: " + starship.positionVector.x)
+      //    println("StarshipView Position X: " + starshipView.positionVector.x)
+      //    println("Starship Position Y: " + starship.positionVector.y)
+      //    println("StarshipView Position Y: " + starshipView.positionVector.y)
+      //    println("Starship Direction X: " + starship.directionVector.x)
+      //    println("StarshipView Direction X: " + starshipView.directionVector.x)
+      //    println("Starship Direction Y: " + starship.directionVector.y)
+      //    println("StarshipView Direction Y: " + starshipView.directionVector.y)
+    })
   }
 
-  def inertiaStarship(inertia: Float): Unit = {
+  /*def inertiaStarship(inertia: Float): Unit = {
     val starshipDirectionX = starship.directionVector.x
     val starshipDirectionY = starship.directionVector.y
     if (starshipDirectionX != 0) {
@@ -182,12 +211,12 @@ object CustomGameFramework extends GameFramework {
     }
     if (starshipDirectionY != 0) {
       starship.break(Vector2(starshipDirectionX, starshipDirectionY * inertia))
-
     }
-  }
+  }*/
 
   def drawHUD(graphics: PGraphics): Unit = {
-    graphics.text("Points: " + player.points + "\nLives: " + player.lives, 10, 20)
+    graphics.text("Player 1" + "\nPoints: " + player.points + "\nLives: " + player.lives, 10, 20)
+    graphics.text("Player 2" + "\nPoints: " + player2.points + "\nLives: " + player2.lives, 940, 20)
   }
 
   def checkEndGame(graphics: PGraphics): Unit ={
