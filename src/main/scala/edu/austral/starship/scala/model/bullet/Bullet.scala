@@ -7,7 +7,7 @@ import edu.austral.starship.scala.base.vector.Vector2
 import edu.austral.starship.scala.model.CollisionableObject
 import edu.austral.starship.scala.model.weapon.Weapon
 
-case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int, maxY: Int) extends CollisionableObject{
+case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int, maxY: Int, width: Int, height: Int, pierce: Boolean) extends CollisionableObject{
 
   override val collisionableType: CollisionableType.Value = CollisionableType.Bullet
   var positionVector: Vector2 = position
@@ -21,7 +21,7 @@ case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int,
 
   override def collisionedWith(collisionable: CollisionableObject): Unit = {
     if(collisionable.collisionableType == CollisionableType.Asteroid) {
-      destroy()
+      if(!pierce) destroy()
       weapon.starship.player.addPoints(1)
     }
   }
@@ -50,7 +50,7 @@ case class Bullet(wea: Weapon, position: Vector2, direction: Vector2, maxX: Int,
 
   def calculateNewPosition(): Unit = {
     positionVector = positionVector + directionVector
-    shape = new Rectangle(positionVector.x toInt, positionVector.y toInt, 20, 20)
+    shape = new Rectangle(positionVector.x toInt, positionVector.y toInt, width, height)
   }
 
   def checkDestroy(): Unit = {

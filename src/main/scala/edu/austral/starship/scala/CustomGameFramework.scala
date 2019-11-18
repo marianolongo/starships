@@ -31,7 +31,7 @@ object CustomGameFramework extends GameFramework {
   var asteroidImage: PImage = new PImage()
   var asteroidViews: List[AsteroidView] = List()
   var bulletImage: PImage = new PImage()
-
+  var heavyBulletImage: PImage = new PImage()
   var starships: List[Starship] = List()
   var starshipsImages: List[PImage] = List()
   var starshipsViews: List[StarshipView] = List()
@@ -44,10 +44,9 @@ object CustomGameFramework extends GameFramework {
   override def setup(windowsSettings: WindowSettings, imageLoader: ImageLoader): Unit = {
     windowsSettings
       .setSize(screen.x, screen.y)
-//    starshipImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship2.png")
     bulletImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\bullet.jpg")
+    heavyBulletImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\heavy_bullet.png")
     asteroidImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\asteroid.jpg")
-//    starshipView.setImg(starshipImage)
 
     collisionEngine = new CollisionEngine[CollisionableObject]
 
@@ -55,7 +54,12 @@ object CustomGameFramework extends GameFramework {
     starshipsImages = List(imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship2.png"), imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\starship3.png"))
     starshipsViews = List(StarshipView(starships.head, starshipsImages.head), StarshipView(starships(1), starshipsImages(1)))
 
-    bullets = List(starships.head.weapon.bullets, starships(1).weapon.bullets)
+    starships.foreach(starship => {
+      starship.weapons.foreach(weapon => {
+        bullets = weapon.bullets :: bullets
+      })
+    })
+//    bullets = List(starships.head.weapon.bullets, starships(1).weapon.bullets)
   }
 
   def checkCollisions(): Unit = {
@@ -118,7 +122,7 @@ object CustomGameFramework extends GameFramework {
   override def draw(graphics: PGraphics, timeSinceLastDraw: Float, keySet: Set[Int]): Unit = {
     checkEndGame(graphics)
     drawHUD(graphics)
-    drawStarship(graphics)
+    drawStarships(graphics)
     drawBullets(graphics)
     generateAsteroid()
     drawAsteroids(graphics)
@@ -134,18 +138,31 @@ object CustomGameFramework extends GameFramework {
       case 83 => starships.head.accelerate(Vector2(0, 0.25 toFloat))
       case 68 => starships.head.accelerate(Vector2(0.25 toFloat, 0))
       case 77 =>
-        starships.head.fire()
-        bullets = List(starships.head.weapon.bullets, bullets(1))
-        bulletViews = BulletView(starships.head.weapon.bullets.head, bulletImage) :: bulletViews
-
+        if(starships.head.fire()){
+          val selectedWeapon = starships.head.selectedWeapon
+          bullets = List(starships.head.weapons(selectedWeapon).bullets, bullets(1))
+          if(selectedWeapon == 0){
+            bulletViews = BulletView(starships.head.weapons(selectedWeapon).bullets.head, bulletImage) :: bulletViews
+          }else{
+            bulletViews = BulletView(starships.head.weapons(selectedWeapon).bullets.head, heavyBulletImage) :: bulletViews
+          }
+        }
+      case 78 => starships.head.changeWeapon()
       case 38 => starships(1).accelerate(Vector2(0, -0.25 toFloat))
       case 37 => starships(1).accelerate(Vector2(-0.25 toFloat, 0))
       case 40 => starships(1).accelerate(Vector2(0, 0.25 toFloat))
       case 39 => starships(1).accelerate(Vector2(0.25 toFloat, 0))
       case 96 =>
-        starships(1).fire()
-        bullets = List(bullets.head, starships(1).weapon.bullets)
-        bulletViews = BulletView(starships(1).weapon.bullets.head, bulletImage) :: bulletViews
+        if(starships(1).fire()){
+          val selectedWeapon = starships(1).selectedWeapon
+          bullets = List(bullets.head, starships(1).weapons(selectedWeapon).bullets)
+          if(selectedWeapon == 0){
+            bulletViews = BulletView(starships(1).weapons(selectedWeapon).bullets.head, bulletImage) :: bulletViews
+          }else{
+            bulletViews = BulletView(starships(1).weapons(selectedWeapon).bullets.head, heavyBulletImage) :: bulletViews
+          }
+        }
+      case 101 => starships(1).changeWeapon()
       case _ =>
     }
   }
@@ -156,7 +173,7 @@ object CustomGameFramework extends GameFramework {
   }
 
 
-  def drawStarship(graphics: PGraphics): Unit = {
+  def drawStarships(graphics: PGraphics): Unit = {
 
     var i = 0
     starshipsViews.foreach(starshipView => {
@@ -191,6 +208,7 @@ object CustomGameFramework extends GameFramework {
       starships(i).calculateNewPosition()
       starshipView.setDirectionVector(starships(i).directionVector)
       starshipView.setPositionVector(starships(i).positionVector)
+      starships(i).weapons.foreach(_.increaseCooling())
       i = i + 1
       //    println("Starship Position X: " + starship.positionVector.x)
       //    println("StarshipView Position X: " + starshipView.positionVector.x)
@@ -214,13 +232,28 @@ object CustomGameFramework extends GameFramework {
     }
   }*/
 
+  def giveWeapon(selectedWeapon: Int): Any = {
+    selectedWeapon match {
+      case 0 => "Normal"
+      case 1 => "Heavy"
+    }
+  }
+
   def drawHUD(graphics: PGraphics): Unit = {
-    graphics.text("Player 1" + "\nPoints: " + player.points + "\nLives: " + player.lives, 10, 20)
-    graphics.text("Player 2" + "\nPoints: " + player2.points + "\nLives: " + player2.lives, 940, 20)
+    graphics.text("Player 1" +
+      "\nPoints: " + player.points +
+      "\nLives: " + player.lives +
+      "\nWeapon: " + giveWeapon(starships.head.selectedWeapon),
+      10, 20)
+    graphics.text("Player 2" +
+      "\nPoints: " + player2.points +
+      "\nLives: " + player2.lives +
+      "\nWeapon: " + giveWeapon(starships(1).selectedWeapon),
+      900, 20)
   }
 
   def checkEndGame(graphics: PGraphics): Unit ={
-    if(player.lives == 0){
+    if(player.lives == 0 || player2.lives == 0){
       graphics.dispose()
       System.exit(0)
     }

@@ -8,5 +8,13 @@ abstract class Weapon {
 
   var bullets: List[Bullet]
   val starship: Starship
-  def fire(direction: Vector2, position: Vector2)
+  var coolingTime: Int = 0
+  def fire(direction: Vector2, position: Vector2): Boolean
+
+  def addBullet(bullet: Bullet): Unit ={
+    bullets = bullet :: bullets
+  }
+  def increaseCooling(): Unit = coolingTime = coolingTime + 1
+
+  def coolingReturn(): Unit = coolingTime = 0
 }
