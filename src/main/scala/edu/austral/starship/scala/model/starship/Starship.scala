@@ -14,10 +14,14 @@ abstract class Starship extends CollisionableObject{
   var weapons: List[Weapon]
   var selectedWeapon: Int
   var player: Player
+  var cooldown: Int
 
   def fire(): Boolean
   def crash(){player.takeLife()}
   def setPositionVector(vector2: Vector2) {positionVector = vector2}
   def setDirectionVector(vector2: Vector2) {directionVector = vector2}
   def changeWeapon()
+
+  def resetCooldown(): Unit = cooldown = 0
+  def sumCooldown(): Unit = cooldown = cooldown + 1
 }

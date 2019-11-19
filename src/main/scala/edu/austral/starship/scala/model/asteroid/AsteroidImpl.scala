@@ -1,6 +1,7 @@
 package edu.austral.starship.scala.model.asteroid
 import java.awt.{Rectangle, Shape}
 
+import edu.austral.starship.scala.base.collision.CollisionableType
 import edu.austral.starship.scala.base.vector.Vector2
 import edu.austral.starship.scala.model.CollisionableObject
 
@@ -27,7 +28,7 @@ case class AsteroidImpl(posX: Float, posY: Float, dirX: Float, dirY: Float, maxX
   }
 
   override def collisionedWith(collisionable: CollisionableObject): Unit = {
-    destroy()
+    if(collisionable.collisionableType != CollisionableType.Asteroid) destroy()
   }
 
   override def calculateNewPosition(): Unit = {

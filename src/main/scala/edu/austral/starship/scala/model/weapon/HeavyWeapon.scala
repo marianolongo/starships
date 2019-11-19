@@ -8,7 +8,7 @@ case class HeavyWeapon(ship: Starship) extends Weapon {
   override val starship: Starship = ship
 
   override def fire(direction: Vector2, position: Vector2): Boolean = {
-    if(coolingTime >= 120){
+    if(coolingTime >= 90){
       val correctPosition = Vector2(position.x + 10, position.y - 20)
       val correctDirection = Vector2(0, -20)
       val bullet = Bullet(this, correctPosition, correctDirection, 1000, 700, 20, 40, pierce = true)

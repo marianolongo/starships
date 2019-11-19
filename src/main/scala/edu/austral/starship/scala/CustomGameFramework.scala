@@ -209,6 +209,7 @@ object CustomGameFramework extends GameFramework {
       starshipView.setDirectionVector(starships(i).directionVector)
       starshipView.setPositionVector(starships(i).positionVector)
       starships(i).weapons.foreach(_.increaseCooling())
+      starships(i).sumCooldown()
       i = i + 1
       //    println("Starship Position X: " + starship.positionVector.x)
       //    println("StarshipView Position X: " + starshipView.positionVector.x)

@@ -10,6 +10,7 @@ import edu.austral.starship.scala.model.player.Player
 
 case class MyStarship(pilot: Player, initalX: Int, initialY: Int) extends Starship{
 
+  override var cooldown: Int = 0
   override var positionVector: Vector2 = Vector2(initalX, initialY)
   override var directionVector: Vector2 = Vector2(0, 0)
   override var weapons: List[Weapon] = List(MyWeapon(this), HeavyWeapon(this))
@@ -45,7 +46,10 @@ case class MyStarship(pilot: Player, initalX: Int, initialY: Int) extends Starsh
   }
 
   def changeWeapon(): Unit = {
-    if(selectedWeapon == weapons.size - 1) selectedWeapon = 0
-    else selectedWeapon = selectedWeapon + 1
+    if(cooldown >= 60){
+      if(selectedWeapon == weapons.size - 1) selectedWeapon = 0
+      else selectedWeapon = selectedWeapon + 1
+      resetCooldown()
+    }
   }
 }
