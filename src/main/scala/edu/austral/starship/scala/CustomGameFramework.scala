@@ -206,27 +206,8 @@ object CustomGameFramework extends GameFramework {
       starships(i).weapons.foreach(_.increaseCooling())
       starships(i).sumCooldown()
       i = i + 1
-      //    println("Starship Position X: " + starship.positionVector.x)
-      //    println("StarshipView Position X: " + starshipView.positionVector.x)
-      //    println("Starship Position Y: " + starship.positionVector.y)
-      //    println("StarshipView Position Y: " + starshipView.positionVector.y)
-      //    println("Starship Direction X: " + starship.directionVector.x)
-      //    println("StarshipView Direction X: " + starshipView.directionVector.x)
-      //    println("Starship Direction Y: " + starship.directionVector.y)
-      //    println("StarshipView Direction Y: " + starshipView.directionVector.y)
     })
   }
-
-  /*def inertiaStarship(inertia: Float): Unit = {
-    val starshipDirectionX = starship.directionVector.x
-    val starshipDirectionY = starship.directionVector.y
-    if (starshipDirectionX != 0) {
-      starship.break(Vector2(starshipDirectionX * inertia, starshipDirectionY))
-    }
-    if (starshipDirectionY != 0) {
-      starship.break(Vector2(starshipDirectionX, starshipDirectionY * inertia))
-    }
-  }*/
 
   def giveWeapon(selectedWeapon: Int): Any = {
     selectedWeapon match {
