@@ -1,9 +1,10 @@
 package edu.austral.starship.scala.model.player
 
-case class Player(poi: Long) {
+case class Player(poi: Long, username: String) {
 
   var points: Long = poi
   var lives: Int = 3
+  val name: String = username
 /*  var keyMap: Map[Int, Actions.Value] = Map((keys.head, Actions.Accelerate),
     (keys(1), Actions.Turn),
     (keys(2), Actions.Break),

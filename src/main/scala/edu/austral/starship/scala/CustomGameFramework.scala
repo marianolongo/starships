@@ -18,14 +18,8 @@ import scala.language.postfixOps
 object CustomGameFramework extends GameFramework {
   var screen = Screen(1000, 700)
 
-  var player = Player(0)
-  var player2 = Player(0)
-
-//  var starship = MyStarship(player, 333, 500)
-//  var bullets: List[Bullet] = starship.weapon.bullets
-//  var starshipImage: PImage = new PImage()
-//  var starshipView = StarshipView(starship, starshipImage)
-//  var bulletViews: List[BulletView] = List()
+  var player = Player(0, "1")
+  var player2 = Player(0, "2")
 
   var asteroids: List[Asteroid] = List()
   var asteroidImage: PImage = new PImage()
@@ -59,7 +53,6 @@ object CustomGameFramework extends GameFramework {
         bullets = weapon.bullets :: bullets
       })
     })
-//    bullets = List(starships.head.weapon.bullets, starships(1).weapon.bullets)
   }
 
   def checkCollisions(): Unit = {
@@ -74,7 +67,6 @@ object CustomGameFramework extends GameFramework {
         bullet.checkDestroy()
       })
     })
-//    bullets = bullets.filter(!_.destroyed)
     bullets = bullets.map(_.filter(!_.destroyed))
 
     bulletViews.foreach(bull => {
@@ -120,15 +112,18 @@ object CustomGameFramework extends GameFramework {
   }
 
   override def draw(graphics: PGraphics, timeSinceLastDraw: Float, keySet: Set[Int]): Unit = {
-    checkEndGame(graphics)
-    drawHUD(graphics)
-    drawStarships(graphics)
-    drawBullets(graphics)
-    generateAsteroid()
-    drawAsteroids(graphics)
-    checkCollisions()
-    keyHandler(keySet)
-    //    inertiaStarship(0.005 toFloat)
+//    checkEndGame(graphics)
+    checkPlayerLoss() match {
+      case Left(player) => showGameOver(player, graphics)
+      case Right(false) =>
+        drawHUD(graphics)
+        drawStarships(graphics)
+        drawBullets(graphics)
+        generateAsteroid()
+        drawAsteroids(graphics)
+        checkCollisions()
+        keyHandler(keySet)
+    }
   }
 
   def keyHandler(keySet: Set[Int]): Unit ={
@@ -258,5 +253,23 @@ object CustomGameFramework extends GameFramework {
       graphics.dispose()
       System.exit(0)
     }
+  }
+
+  def showGameOver(player: Player, graphics: PGraphics): Unit = {
+      graphics.text("GAME OVER!" +
+        "\n" +
+        "Player " + player.name + " lost" +
+        "\n-------------" +
+        "\nPlayer 1 points: " + player.points +
+        "\n-------------" +
+        "\nPlayer 2 points: " + player2.points,
+        (screen.x / 2) - 50,
+        screen.y / 2)
+  }
+
+  def checkPlayerLoss(): Either[Player, Boolean] = {
+    if(player.lives == 0) Left(player)
+    else if(player2.lives == 0) Left(player2)
+    else Right(false)
   }
 }
