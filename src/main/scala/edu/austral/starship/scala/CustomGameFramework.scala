@@ -40,7 +40,7 @@ object CustomGameFramework extends GameFramework {
       .setSize(screen.x, screen.y)
     bulletImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\bullet.jpg")
     heavyBulletImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\heavy_bullet.png")
-    asteroidImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\asteroid.jpg")
+    asteroidImage = imageLoader.load("C:\\Users\\Mariano\\projects\\starships\\src\\resources\\asteroid2.png")
 
     collisionEngine = new CollisionEngine[CollisionableObject]
 
